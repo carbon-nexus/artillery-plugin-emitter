@@ -6,7 +6,7 @@ import { Credentials, SNS } from 'aws-sdk';
 import { PublishInput } from 'aws-sdk/clients/sns';
 
 //config.plugins.statsd
-class BrokerEmitter {
+export class BrokerEmitter {
     public config: BrokerEmitterConfig;
     private creds: Credentials;
     private sns: SNS;
@@ -136,4 +136,3 @@ class BrokerEmitter {
     }
 
 }
-

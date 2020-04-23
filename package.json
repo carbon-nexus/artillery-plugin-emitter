@@ -2,7 +2,11 @@
   "name": "artillery-plugin-emitter",
   "version": "1.0.0",
   "description": "send artillery events to a variety of event brokers",
-  "main": "src/index.ts",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "directories": {
     "test": "test"
   },
@@ -15,7 +19,7 @@
     "typescript": "^3.8.3"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc --project tsconfig.json"
   },
   "repository": {
     "type": "git",

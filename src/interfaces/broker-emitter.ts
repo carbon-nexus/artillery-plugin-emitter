@@ -10,7 +10,7 @@ export interface BrokerEmitterConfig {
     vendor: "aws",
     broker: "sns",
     sns?: SnsBrokerEmitter,
-    loggingLevel: number
+    loggingLevel?: "silly" | "debug" | "verbose" | "http" | "info" | "warn" | "error"
 }
 
 export interface BrokerEventAttributes {

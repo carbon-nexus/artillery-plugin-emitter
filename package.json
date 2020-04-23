@@ -1,0 +1,33 @@
+{
+  "name": "artillery-plugin-emitter",
+  "version": "1.0.0",
+  "description": "send artillery events to a variety of event brokers",
+  "main": "src/index.ts",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "aws-sdk": "^2.661.0"
+  },
+  "devDependencies": {
+    "@types/node": "^13.13.2",
+    "typescript": "^3.8.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/carbon-nexus/artillery-plugin-emitter.git"
+  },
+  "keywords": [
+    "artillery",
+    "artillery-plugin"
+  ],
+  "author": "Jon McLean",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/carbon-nexus/artillery-plugin-emitter/issues"
+  },
+  "homepage": "https://github.com/carbon-nexus/artillery-plugin-emitter#readme"
+}

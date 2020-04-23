@@ -1,3 +1,11 @@
+export interface ArtilleryConfig {
+    plugins: ArtilleryPlugins
+}
+
+export interface ArtilleryPlugins {
+    emitter: BrokerEmitterConfig
+}
+
 export interface BrokerEmitterConfig {
     vendor: "aws",
     broker: "sns",

@@ -1,16 +1,17 @@
-import { BrokerEmitterConfig, ArtilleryEventEmitter, BrokerEventAttributes } from './interfaces/broker-emitter';
+import { BrokerEmitterConfig, ArtilleryEventEmitter, BrokerEventAttributes, ArtilleryConfig } from './interfaces/broker-emitter';
 import { BrokerEmitterError } from './errors/broker-emitter';
 
 import { Credentials, SNS } from 'aws-sdk';
 import { PublishInput } from 'aws-sdk/clients/sns';
 
+//config.plugins.statsd
 class BrokerEmitter {
     public config: BrokerEmitterConfig;
     private creds: Credentials;
     private sns: SNS;
 
-    constructor(config: BrokerEmitterConfig, ee: ArtilleryEventEmitter) {
-        this.config = config;
+    constructor(config: ArtilleryConfig, ee: ArtilleryEventEmitter) {
+        this.config = config.plugins.emitter;
         if(this.config.vendor === "aws") this.validateAwsSetup();
         ee.on('phaseStarted', this.handlePhaseStartedEvent.bind(this));
         ee.on('phaseCompleted', this.handlePhaseCompletedEvent.bind(this));

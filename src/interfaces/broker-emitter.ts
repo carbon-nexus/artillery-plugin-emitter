@@ -1,3 +1,7 @@
+export interface ArtilleryConfigParam {
+    config: ArtilleryConfig
+}
+
 export interface ArtilleryConfig {
     plugins: ArtilleryPlugins
 }

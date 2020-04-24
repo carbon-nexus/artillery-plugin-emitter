@@ -1,4 +1,4 @@
-import { BrokerEmitterConfig, ArtilleryEventEmitter, BrokerEventAttributes, ArtilleryConfig } from './interfaces/broker-emitter';
+import { BrokerEmitterConfig, ArtilleryEventEmitter, BrokerEventAttributes, ArtilleryConfigParam } from './interfaces/broker-emitter';
 import { BrokerEmitterError } from './errors/broker-emitter';
 
 import winston, { Logger } from 'winston';
@@ -6,14 +6,15 @@ import { Credentials, SNS } from 'aws-sdk';
 import { PublishInput } from 'aws-sdk/clients/sns';
 
 //config.plugins.statsd
-export class BrokerEmitter {
+export class Plugin {
     public config: BrokerEmitterConfig;
     private creds: Credentials;
     private sns: SNS;
     private logger: Logger;
+    private region: string;
 
-    constructor(config: ArtilleryConfig, ee: ArtilleryEventEmitter) {
-        this.config = config.plugins.emitter;
+    constructor(params: ArtilleryConfigParam, ee: ArtilleryEventEmitter) {
+        this.config = params.config.plugins.emitter;
         this.setupLogger();
         this.logger.debug(`received config: ${JSON.stringify(this.config, null, 4)}`)
         if (this.config.vendor === "aws") this.validateAwsSetup();
@@ -58,7 +59,7 @@ export class BrokerEmitter {
             }
         }
         this.logger.debug(`AWS SNS params: ${JSON.stringify(params,null,4)}`)
-        return this.sns.publish(params).promise();
+        return this.sns.publish(params).promise().catch(this.handleError.bind(this));
     }
 
     handleError(message: string) {
@@ -120,17 +121,27 @@ export class BrokerEmitter {
         } else {
             this.creds = new Credentials({
                 accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+                secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
             });
             this.logger.debug(`using creds: \n\taccess_key_id=${this.creds.accessKeyId}\n\tsecret_access_key=${this.creds.secretAccessKey}`);
         }
+
+        // Set AWS Region if not found
+        if(!process.env.AWS_DEFAULT_REGION) {
+            this.logger.warn("AWS_DEFAULT_REGION environment variable not set, using us-east-1");
+            this.region = 'us-east-1';
+        } else {
+            this.region = process.env.AWS_DEFAULT_REGION;
+        }
+        this.logger.debug(`using region ${this.region}`);
+
         // Validate SNS Broker
         if (this.config.broker === "sns") {
             this.logger.silly('validating SNS configuration');
             if (!this.config.sns.arn) {
                 this.handleError('Need to supply SNS Topic ARN to emit to')
             } else {
-                this.sns = new SNS({ credentials: this.creds });
+                this.sns = new SNS({ credentials: this.creds, region: this.region });
             }
         }
     }

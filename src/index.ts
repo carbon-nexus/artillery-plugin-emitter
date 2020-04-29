@@ -2,6 +2,7 @@ import { BrokerEmitterConfig, ArtilleryEventEmitter, BrokerEventAttributes, Arti
 import { BrokerEmitterError } from './errors/broker-emitter';
 
 import winston, { Logger } from 'winston';
+import { once, EventEmitter } from 'events';
 import { Credentials, SNS } from 'aws-sdk';
 import { PublishInput } from 'aws-sdk/clients/sns';
 
@@ -12,23 +13,27 @@ export class Plugin {
     private sns: SNS;
     private logger: Logger;
     private region: string;
+    private doneEventPromise: Promise<any>;
 
-    constructor(params: ArtilleryConfigParam, ee: ArtilleryEventEmitter) {
+    constructor(params: ArtilleryConfigParam, ee: EventEmitter) {
         this.config = params.config.plugins.emitter;
         this.setupLogger();
         this.logger.debug(`received config: ${JSON.stringify(this.config, null, 4)}`)
         if (this.config.vendor === "aws") this.validateAwsSetup();
-        ee.on('phaseStarted', this.handlePhaseStartedEvent.bind(this));
-        ee.on('phaseCompleted', this.handlePhaseCompletedEvent.bind(this));
-        ee.on('stats', this.handleStatsEvent.bind(this));
-        ee.on('done', this.handleDoneEvent.bind(this));
+        this.setupSubscriptions(ee);
+    }
+
+    async cleanup(next: () => {}) {
+        await this.doneEventPromise;
+        this.logger.silly("finished sending 'done' event data");
+        next();
     }
 
     emit(data: any, attributes: BrokerEventAttributes) {
         this.logger.silly('attempting to emit event to defined broker');
         this.logger.debug(`data = ${JSON.stringify(data, null, 4)}`)
         this.logger.debug(`emitting for source = ${attributes.source} type = ${attributes.type}`);
-        if (this.config.vendor === "aws") this.emitAws(data, attributes);
+        if (this.config.vendor === "aws") return this.emitAws(data, attributes);
         else {
             this.handleError(`No current support for emitting event to vender='${this.config.vendor}'`);
         }
@@ -36,7 +41,7 @@ export class Plugin {
 
     emitAws(data: any, attributes: BrokerEventAttributes) {
         this.logger.silly("determining which AWS broker to send the event to");
-        if (this.config.broker === "sns") this.emitAwsSns(data, attributes);
+        if (this.config.broker === "sns") return this.emitAwsSns(data, attributes);
         else {
             this.handleError(`No current support for emitting event to broker='${this.config.broker}'`)
         }
@@ -69,11 +74,10 @@ export class Plugin {
 
     async handleDoneEvent(data: any) {
         this.logger.silly("sending 'done' event data");
-        await this.emit(data, {
+        this.doneEventPromise = this.emit(data, {
             type: 'done',
             source: 'artillery'
         });
-        this.logger.silly("finished sending 'done' event data");
     }
 
     async handleStatsEvent(data: any) {
@@ -112,6 +116,13 @@ export class Plugin {
         });
     }
 
+    async setupSubscriptions(ee: EventEmitter) {
+        ee.on('phaseStarted', this.handlePhaseStartedEvent.bind(this));
+        ee.on('phaseCompleted', this.handlePhaseCompletedEvent.bind(this));
+        ee.on('stats', this.handleStatsEvent.bind(this));
+        ee.on('done', this.handleDoneEvent.bind(this));
+    }
+
     validateAwsSetup(): void {
         // Validate Access Credentials are set
         this.logger.silly('attempting to validate AWS setup');
@@ -145,5 +156,4 @@ export class Plugin {
             }
         }
     }
-
 }

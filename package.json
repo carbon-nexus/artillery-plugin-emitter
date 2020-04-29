@@ -1,6 +1,6 @@
 {
   "name": "artillery-plugin-emitter",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "send artillery events to a variety of event brokers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

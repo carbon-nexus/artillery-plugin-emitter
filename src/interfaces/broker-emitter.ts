@@ -13,6 +13,7 @@ export interface ArtilleryPlugins {
 export interface BrokerEmitterConfig {
     vendor: "aws",
     broker: "sns",
+    type?: string
     sns?: SnsBrokerEmitter,
     loggingLevel?: "silly" | "debug" | "verbose" | "http" | "info" | "warn" | "error"
 }

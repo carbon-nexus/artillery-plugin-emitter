@@ -74,16 +74,18 @@ export class Plugin {
 
     async handleDoneEvent(data: any) {
         this.logger.silly("sending 'done' event data");
+        let type = this.config.type ? `done.${this.config.type}` : 'done';
         this.doneEventPromise = this.emit(data, {
-            type: 'done',
+            type,
             source: 'artillery'
         });
     }
 
     async handleStatsEvent(data: any) {
         this.logger.silly("sending 'stats' event data");
+        let type = this.config.type ? `stats.${this.config.type}` : 'stats';
         await this.emit(data, {
-            type: 'stats',
+            type,
             source: 'artillery'
         });
         this.logger.silly("finished sending 'stats' event data");
@@ -91,8 +93,9 @@ export class Plugin {
 
     async handlePhaseCompletedEvent(data: any) {
         this.logger.silly("sending 'phaseCompleted' event data");
+        let type = this.config.type ? `phaseCompleted.${this.config.type}` : 'phaseCompleted';
         await this.emit(data, {
-            type: 'phaseCompleted',
+            type,
             source: 'artillery'
         });
         this.logger.silly("finished sending 'phaseCompleted' event data");
@@ -100,8 +103,9 @@ export class Plugin {
 
     async handlePhaseStartedEvent(data: any) {
         this.logger.silly("sending 'phaseStarted' event data");
+        let type = this.config.type ? `phaseStarted.${this.config.type}` : 'phaseStarted';
         await this.emit(data, {
-            type: 'phaseStarted',
+            type,
             source: 'artillery'
         });
         this.logger.silly("finished sending 'phaseStarted' event data");

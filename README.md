@@ -16,6 +16,7 @@ The below are available plugin configuration parameters:
 export interface BrokerEmitterConfig {
     vendor: "aws",
     broker: "sns",
+    type?: string,
     sns?: SnsBrokerEmitter,
     loggingLevel?: "silly" | "debug" | "verbose" | "http" | "info" | "warn" | "error"
 }
@@ -40,9 +41,12 @@ config:
       loggingLevel: silly
       broker: sns
       vendor: aws
+      type: stress
       sns:
         arn: arn:aws:sns:us-east-1:1234567890:artillery-test
 ```
+
+> Note: Adding a config `type` key will change the event emitted to be `<artillery-event>.<type>`. For example, when doing a stress type, the done event will now emit `done.stress` to external brokers.
 
 ### AWS Setup
 For AWS Setup, the below environment variables need to be configured:
